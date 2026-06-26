@@ -20,7 +20,7 @@
 
 html,body{
   margin:0;
-  font-family:Montserrat regular ;
+  font-family:Arial, Helvetica, "Segoe UI", sans-serif;
   background:linear-gradient(180deg,var(--bg),#f6f8ff);
 }
 
@@ -214,7 +214,7 @@ footer{
 </div>
 
 <header>
-  <img src="handyup-blanc.png" class="header-logo" alt="Handy'Up" />
+  <img src="https://omerar1f.github.io/signature-handyup/assets/handyup-blanc.png" class="header-logo" alt="Handy'Up" />
 </header>
 
 <div class="container">
@@ -645,7 +645,7 @@ function update(){
   }
 
   preview.innerHTML = `
-<table cellpadding="0" cellspacing="0" style="font-family:Montserrat regular ;font-size:17px;color:${textColor};border-collapse:collapse">
+<table cellpadding="0" cellspacing="0" style="font-family:Arial, Helvetica, "Segoe UI", sans-serif;font-size:17px;color:${textColor};border-collapse:collapse">
   <tr>
     <td style="padding-right:22px;vertical-align:top;color:${textColor}">
       <span style="font-weight:700;color:${textColor}">${prenom.value} ${nom.value}</span><br>
@@ -660,20 +660,20 @@ function update(){
     <tr>
       <!-- ICÔNES -->
       <td style="vertical-align:middle;padding-right:6px">
-        <a href="https://www.facebook.com/groupeassociatifhandyup/" target="_blank">
+        <a href="https://www.facebook.com/groupeassociatifhandyup/" target="_blank" rel="noopener">
           <img src="${asset('facebook.png')}" height="${SIZE.socialIconH}" style="display:inline-block;border:0">
         </a>
-        <a href="https://www.linkedin.com/company/groupe-associatif-handy-up" target="_blank">
+        <a href="https://www.linkedin.com/company/groupe-associatif-handy-up" target="_blank" rel="noopener">
           <img src="${asset('linkedin.png')}" height="${SIZE.socialIconH}" style="display:inline-block;border:0">
         </a>
-        <a href="https://www.youtube.com/@groupeassociatifhandyup707" target="_blank">
+        <a href="https://www.youtube.com/@groupeassociatifhandyup707" target="_blank" rel="noopener">
           <img src="${asset('youtube.png')}" height="${SIZE.socialIconH}" style="display:inline-block;border:0">
         </a>
       </td>
 
       <!-- IMAGE NOUS RECRUTONS -->
       <td style="vertical-align:middle">
-        <a href="https://handyup.flatchr.io/" target="_blank">
+        <a href="https://handyup.flatchr.io/" target="_blank" rel="noopener">
           <img
             src="${asset('nous-recrutons.png')}"
             height="120"
@@ -685,7 +685,7 @@ function update(){
     </tr>
   </table>
 </td>
-
+  </tr>
 
   ${bottomBlock}
 </table>`;
