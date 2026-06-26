@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Générateur de signature – Handy’Up</title>
+
+<style>
+:root{
+  --primary:#1d2a58;
+  --accent:#21407d;
+  --bg:#eef2fb;
+  --card:#ffffff;
+  --muted:#6b7280;
+  --radius:14px;
+  --maxw:1200px;
+}
+
+*{box-sizing:border-box}
+
+html,body{
+  margin:0;
+  font-family:Montserrat regular ;
+  background:linear-gradient(180deg,var(--bg),#f6f8ff);
+}
+
+/* 🔐 LOCKSCREEN */
+#lockscreen{
+  position:fixed;
+  inset:0;
+  background:linear-gradient(180deg,var(--bg),#f6f8ff);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+.lock-card{
+  background:#fff;
+  border-radius:14px;
+  padding:28px;
+  width:380px;
+  max-width:92%;
+  box-shadow:0 12px 36px rgba(15,23,42,.18);
+}
+.lock-title{
+  margin:0 0 8px;
+  color:var(--primary);
+  font-size:18px;
+}
+.lock-sub{
+  margin:0 0 18px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.35;
+}
+.lock-input{
+  width:100%;
+  padding:14px 16px;
+  border-radius:12px;
+  border:1px solid #dfe4ef;
+  font-size:14px;
+}
+.lock-btn{
+  margin-top:14px;
+  width:100%;
+  background:var(--primary);
+  color:#fff;
+  border:0;
+  border-radius:12px;
+  padding:14px 16px;
+  font-size:14px;
+  cursor:pointer;
+}
+.lock-error{
+  display:none;
+  margin-top:12px;
+  color:#b91c1c;
+  font-size:13px;
+}
+
+/* HEADER */
+header{
+  background:linear-gradient(90deg,var(--primary),var(--accent));
+  padding:16px 36px;
+  box-shadow:0 8px 28px rgba(20, 70, 187, 0.28);
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+}
+.header-logo{
+  height:100px;
+  max-width:100%;
+  display:block;
+  mix-blend-mode:screen;
+}
+
+/* LAYOUT */
+.container{
+  max-width:var(--maxw);
+  margin:26px auto;
+  display:flex;
+  gap:28px;
+  padding:0 20px 44px;
+}
+.box{
+  background:#fff;
+  border-radius:var(--radius);
+  padding:24px;
+  box-shadow:0 12px 36px rgba(15,23,42,.1);
+}
+.form-box{width:40%}
+.preview-box{width:60%}
+
+/* FORM */
+label{
+  display:block;
+  margin-top:16px;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:600;
+}
+input,select{
+  width:100%;
+  padding:14px 16px;
+  margin-top:6px;
+  border-radius:12px;
+  border:1px solid #dfe4ef;
+  font-size:15px;
+}
+button{
+  margin-top:22px;
+  background:var(--primary);
+  color:#fff;
+  border:0;
+  border-radius:12px;
+  padding:14px 20px;
+  font-size:15px;
+  cursor:pointer;
+}
+
+/* PREVIEW */
+.preview-title{
+  display:block;
+  margin-bottom:14px;
+}
+
+#preview{
+  background:#fff;
+  border-radius:16px;
+  padding:18px;
+  min-height:520px;
+  width:100%;
+  border:2px dashed rgba(29,42,88,.30);
+  box-shadow: inset 0 0 0 8px rgba(238,242,251,.85);
+}
+
+#preview::before{
+  content:"Signature (aperçu)";
+  display:inline-block;
+  margin:0 0 12px 0;
+  padding:6px 10px;
+  border-radius:10px;
+  background:rgba(238,242,251,.95);
+  color:#1d2a58;
+  font-size:12px;
+  font-weight:700;
+}
+
+/* FOOTER */
+footer{
+  margin-top:10px;
+  background:#ffffff;
+  border-top:1px solid #e6eaf5;
+}
+.footer-inner{
+  max-width:var(--maxw);
+  margin:0 auto;
+  padding:18px 20px;
+  display:flex;
+  gap:14px;
+  align-items:center;
+  justify-content:space-between;
+  color:#1d2a58;
+  font-size:13px;
+}
+.footer-left{display:flex;flex-direction:column;gap:4px}
+.footer-right{display:flex;align-items:center;gap:10px}
+.footer-right a{color:#1d2a58;text-decoration:none}
+.footer-right a:hover{text-decoration:underline}
+
+@media(max-width:960px){
+  .container{flex-direction:column}
+  .form-box,.preview-box{width:100%}
+  .footer-inner{flex-direction:column;align-items:flex-start}
+}
+@media(max-width:520px){
+  .header-logo{height:140px}
+  header{padding:10px 15px}
+}
+</style>
+</head>
+
+<body>
+
+<!--LOCKSCREEN -->
+<div id="lockscreen">
+  <div class="lock-card">
+    <h2 class="lock-title">Accès sécurisé</h2>
+    <p class="lock-sub">Générateur de signature interne Handy’Up</p>
+    <input id="accessPassword" class="lock-input" type="password" placeholder="Mot de passe">
+    <button class="lock-btn" onclick="checkPassword()">Accéder</button>
+    <div id="lockError" class="lock-error">Mot de passe incorrect</div>
+  </div>
+</div>
+
+<header>
+  <img src="handyup-blanc.png" class="header-logo" alt="Handy'Up" />
+</header>
+
+<div class="container">
+
+  <!-- FORM -->
+  <div class="box form-box">
+
+    <label>Type de signature</label>
+    <select id="type" onchange="onTypeChange()">
+      <option value="">Sélectionner</option>
+      <option value="corporate">Corporate</option>
+      <option value="secteur">Secteur</option>
+      <option value="etablissement">Établissement</option>
+      <option value="specific">Spécifique</option>
+    </select>
+
+    <div id="secteurBloc" style="display:none">
+      <label>Secteur</label>
+      <select id="secteur" onchange="update()">
+        <option value="">Sélectionner</option>
+        <option value="enfance">Enfance</option>
+        <option value="residence">Résidence</option>
+        <option value="pro">Pro</option>
+        <option value="viesociale">Vie sociale</option>
+      </select>
+    </div>
+
+    <div id="etabBloc" style="display:none">
+      <label>Établissement</label>
+      <select id="etablissement" onchange="update()">
+        <option value="">Sélectionner</option>
+        <option value="adapei-enfance-70-gray">Adapei Enfance 70 Gray</option>
+        <option value="adapei-enfance-70-hericourt">Adapei Enfance 70 Héricourt</option>
+        <option value="adapei-enfance-70-luxeuil">Adapei Enfance 70 Luxeuil</option>
+        <option value="adapei-residence-70-gevigney">Adapei Résidence 70 Gevigney</option>
+        <option value="adapei-residence-70-lure">Adapei Résidence 70 Lure</option>
+        <option value="adapei-residence-70-vesoul-grillons">Adapei Résidence 70 Vesoul – Grillons</option>
+        <option value="adapei-residence-70-vesoul-krystal">Adapei Résidence 70 Vesoul – Krystal</option>
+        <option value="agei-residence-21-bezouotte">Agei Résidence 21 Bézouotte</option>
+        <option value="agei-residence-21-reneve">Agei Résidence 21 Renève</option>
+        <option value="adapei-pro-70-arc-les-gray">Adapei Pro 70 Arc-lès-Gray</option>
+        <option value="adapei-pro-70-gevigney">Adapei Pro 70 Gevigney</option>
+        <option value="adapei-pro-70-hericourt">Adapei Pro 70 Héricourt</option>
+        <option value="adapei-pro-70-saint-sauveur">Adapei Pro 70 Saint-Sauveur</option>
+        <option value="adapei-pro-70-vesoul-repes-nord">Adapei Pro 70 Vesoul Rêpes Nord</option>
+        <option value="adapei-pro-70-vesoul-repes-sud">Adapei Pro 70 Vesoul Rêpes Sud</option>
+        <option value="adapei-pro-70-vesoul-technologia">Adapei Pro 70 Vesoul Technologia</option>
+        <option value="agei-pro-21-bezouotte">Agei Pro 21 Bézouotte</option>
+        <option value="psp">PSP</option>
+      </select>
+    </div>
+
+    <div id="specificBloc" style="display:none">
+      <label>Spécifique</label>
+      <select id="specific" onchange="update()">
+        <option value="">Sélectionner</option>
+        <option value="at70">AT70</option>
+        <option value="idoine">Idoine</option>
+        <option value="kaoli">Kaoli</option>
+        <option value="le-castel-vesulium">Le Castel Vesulium</option>
+        <option value="jardins-du-cat">Les Jardins du CAT</option>
+      </select>
+    </div>
+
+    <label>Prénom</label><input id="prenom" oninput="update()">
+    <label>Nom</label><input id="nom" oninput="update()">
+    <label>Fonction</label><input id="fonction" oninput="update()">
+
+    <label>Téléphone fixe</label>
+    <input id="telFixe" oninput="update()" placeholder="03 84 00 00 00">
+
+    <label>Téléphone mobile</label>
+    <input id="telMobile" oninput="update()" placeholder="06 00 00 00 00">
+
+    <label>Email</label><input id="mail" oninput="update()">
+
+    <button onclick="copySignature()">Copier la signature (Outlook)</button>
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="box preview-box">
+    <div id="preview"></div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <div style="font-weight:700">Groupe Associatif Handy’Up</div>
+      <div>Générateur de signature – version interne</div>
+      <div class="footer-right">
+      <div style="font-weight:700">Crée par O.O.</div>
+    </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+
+const ACCESS_PASSWORD = "S1GnaTUr3!H@nDyUP7021?";
+
+const ACCESS_TTL_MIN = 10;
+
+let accessGranted = false;
+let accessTimer = null;
+
+function showLock(){
+  const lock = document.getElementById("lockscreen");
+  if(lock) lock.style.display = "flex";
+
+  const err = document.getElementById("lockError");
+  if(err) err.style.display = "none";
+
+  const input = document.getElementById("accessPassword");
+  if(input) input.value = "";
+}
+
+function hideLock(){
+  const lock = document.getElementById("lockscreen");
+  if(lock) lock.style.display = "none";
+}
+
+function startAccessTimer(){
+  if(accessTimer) clearTimeout(accessTimer);
+  accessTimer = setTimeout(() => {
+    accessGranted = false;
+    showLock();
+  }, ACCESS_TTL_MIN * 60 * 1000);
+}
+
+/* (option) relance le timer si l’utilisateur interagit */
+function bumpTimer(){
+  if(!accessGranted) return;
+  startAccessTimer();
+}
+
+function checkPassword(){
+  const v = (document.getElementById("accessPassword").value || "").trim();
+  if(v === ACCESS_PASSWORD){
+    accessGranted = true;
+    hideLock();
+    startAccessTimer();
+  }else{
+    document.getElementById("lockError").style.display = "block";
+  }
+}
+
+/* Au chargement : toujours lock (donc refresh => redemande) */
+document.addEventListener("DOMContentLoaded", () => {
+  showLock();
+});
+
+/* Enter pour valider */
+document.addEventListener("keydown", (e) => {
+  const lock = document.getElementById("lockscreen");
+  if(e.key === "Enter" && lock && lock.style.display !== "none"){
+    checkPassword();
+    return;
+  }
+  bumpTimer();
+});
+document.addEventListener("mousemove", bumpTimer, {passive:true});
+document.addEventListener("click", bumpTimer, {passive:true});
+document.addEventListener("scroll", bumpTimer, {passive:true});
+
+/* =========================
+   ✅ TON CODE EXISTANT
+   ========================= */
+
+const ASSET_BASE="";
+function asset(path){
+  if(!path) return "";
+  return ASSET_BASE ? (ASSET_BASE + path) : path;
+}
+
+const SIEGE="4, rue Marie-Chantal Isle de Beauchaine<br>BP 60105 – 70002 Vesoul Cedex";
+
+const ESTABLISHMENTS={
+  "adapei-enfance-70-gray":"11 rue du 11 Novembre, 70103 Gray Cedex",
+  "adapei-enfance-70-hericourt":"2–4 Faubourg de Besançon, 70400 Héricourt",
+  "adapei-enfance-70-luxeuil":"33 rue de Beauregard, 70302 Luxeuil-les-Bains",
+  "adapei-residence-70-gevigney":"7 rue de Montgillard, 70500 Gevigney-et-Mercey",
+  "adapei-residence-70-lure":"10 rue des Sources, 70200 Lure",
+  "adapei-residence-70-vesoul-grillons":"10B rue Jules-Alexis Muenier, 70000 Vesoul",
+  "adapei-residence-70-vesoul-krystal":"6 rue Isle-de-Beauchaine, 70000 Vesoul",
+  "agei-residence-21-bezouotte":"9 rue de la Forge, 21310 Bézouotte",
+  "agei-residence-21-reneve":"Rue de la Fontaine, 21310 Renève",
+  "adapei-pro-70-arc-les-gray":"44 ZI Les Giranaux, 70100 Arc-lès-Gray",
+  "adapei-pro-70-gevigney":"Site horticole & entretien espaces verts <br>7 rue Montgillard, 70500 GEVIGNEY ET MERCEY <br> Site industrie & prestations service <br>ZA La Maladière, 70500 GEVIGNEY ET MERCEY",
+  "adapei-pro-70-hericourt":"22 rue du Chêne Sec, 70400 Héricourt",
+  "adapei-pro-70-saint-sauveur":"3 rue Pierre Bérégovoy, 70300 Saint-Sauveur",
+  "adapei-pro-70-vesoul-repes-nord":"2 rue Claude Bernard, 70000 Vesoul",
+  "adapei-pro-70-vesoul-repes-sud":"9 route de Saint-Loup, 70000 Vesoul",
+  "adapei-pro-70-vesoul-technologia":"5 rue Max Devaux, 70000 Vesoul",
+  "agei-pro-21-bezouotte":"9 rue de la Forge, 21310 Bézouotte",
+  "psp":"6 rue Maginot, 70000 Vesoul",
+  "at70":"18 rue de l’Oasis, 70000 Pusey",
+  "idoine":"15C chemin des Essarts, 25000 Besançon",
+  "kaoli":"22 rue du Chêne Sec, 70400 Héricourt",
+  "le-castel-vesulium":"50 avenue Baron Bouvier, 70000 Vesoul",
+  "jardins-du-cat":"20 Grande Rue, 21310 Mirebeau-sur-Bèze"
+};
+
+const SECTORS={
+  enfance:{ logoSlogan:"Handyup-enfance-slogan.png", partners:["adapei-enfance-70.png"] },
+  residence:{ logoSlogan:"Handyup-residence-slogan.png", partners:["adapei-residence-70.png","agei-residence-21.png"] },
+  pro:{ logoSlogan:"Handyup-pro-slogan.png", partners:["adapeipro70.png","ageipro21.png","kaoli.png","castel.png"] },
+  viesociale:{ logoSlogan:"Handyup-viesociale-slogan.png", partners:["AT70.png","psp.png","Idoine.png"] }
+};
+
+const ETAB_HANDYUP_NO_SLOGAN = {
+  enfance:"Handyup-enfance.png",
+  residence:"Handyup-residence.png",
+  pro:"Handyup-pro.png",
+  viesociale:"Handyup-viesociale.png"
+};
+
+const CORPORATE_SMALL_LOGOS = ["adapei.png","AGEI.png","AT70.png","Idoine.png"];
+const CORPORATE_MAIN_SLOGAN = "handyup-corpo-slogan.png";
+
+const SPECIFICS = {
+  "idoine": { logo:"Idoine.png", sector:"viesociale" },
+  "at70": { logo:"AT70.png", sector:"viesociale" },
+  "kaoli": { logo:"kaoli.png", sector:"pro" },
+  "le-castel-vesulium": { logo:"castel.png", sector:"pro" },
+  "jardins-du-cat": { logo:"jardins-du-cat.png", sector:"pro" }
+};
+
+function sectorFromKey(k){
+  if(k.includes("enfance"))return"enfance";
+  if(k.includes("residence"))return"residence";
+  if(k.includes("pro"))return"pro";
+  return"viesociale";
+}
+
+function etabPartnerLogo(key, sector){
+  if(sector==="enfance") return "adapei-enfance-70.png";
+  if(sector==="residence"){
+    if(key.startsWith("adapei-residence-70-")) return "adapei-residence-70.png";
+    if(key.startsWith("agei-residence-21-")) return "agei-residence-21.png";
+    return "adapei-residence-70.png";
+  }
+  if(sector==="pro"){
+    if(key.startsWith("adapei-pro-70-")) return "adapeipro70.png";
+    if(key.startsWith("agei-pro-21-")) return "ageipro21.png";
+    return "adapeipro70.png";
+  }
+  if(sector==="viesociale"){
+    if(key==="psp") return "psp.png";
+    return "";
+  }
+  return "";
+}
+
+const SIZE = {
+  socialIconH: 26,
+  corporateMainH: 170,
+  corporateSmallH: 35,
+  sectorMainH: 150,
+  sectorPartnersH: 50,
+
+  etabLeftH: 80,
+  etabLeftEnfanceH: 45,
+  etabLeftPSPH: 140,
+  etabRightSectorH: 82,
+
+  specificRightSectorH: 60
+};
+
+function sizeForSpecificLeftLogo(path){
+  const p = String(path||"").toLowerCase();
+  if(p === "idoine.png") return 135;
+  if(p === "at70.png") return 120;
+  if(p === "kaoli.png") return 150;
+  if(p === "castel.png") return 95;
+  if(p === "jardins-du-cat.png") return 160;
+  return 84;
+}
+
+function buildPartnersRow(paths, heightPx){
+  if(!paths || !paths.length) return "";
+  return `
+    <table cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin:0">
+      <tr>
+        ${paths.map((p, i) => `
+          <td style="padding-right:${i === paths.length-1 ? 0 : 14}px;vertical-align:middle">
+            <img src="${asset(p)}" style="height:${heightPx}px;display:block">
+          </td>
+        `).join("")}
+      </tr>
+    </table>
+  `;
+}
+
+function update(){
+  if(!type.value){preview.innerHTML="";return;}
+
+  let sector="", address="";
+  let mode = "";
+
+  let mainLeftVisual = "";
+  let partnersHTML = "";
+
+  let leftLogo = "";
+  let rightLogo = "";
+
+  if(type.value==="corporate"){
+    address = SIEGE;
+    mode = "corporate";
+    mainLeftVisual = CORPORATE_MAIN_SLOGAN;
+    partnersHTML = buildPartnersRow(CORPORATE_SMALL_LOGOS, SIZE.corporateSmallH);
+  }
+
+  if(type.value==="secteur"){
+    sector = secteurSel.value; if(!sector) return;
+    address = SIEGE;
+    mode = "sector";
+    mainLeftVisual = SECTORS[sector].logoSlogan;
+    partnersHTML = buildPartnersRow(SECTORS[sector].partners, SIZE.sectorPartnersH);
+  }
+
+  if(type.value==="etablissement"){
+    const k = etablissement.value; if(!k) return;
+    sector = sectorFromKey(k);
+    address = ESTABLISHMENTS[k] || "";
+    mode = "etab";
+    leftLogo = etabPartnerLogo(k, sector);
+    rightLogo = ETAB_HANDYUP_NO_SLOGAN[sector] || "";
+  }
+
+  if(type.value==="specific"){
+    const k = specific.value; if(!k) return;
+    const sp = SPECIFICS[k]; if(!sp) return;
+
+    sector = sp.sector;
+    address = ESTABLISHMENTS[k] || SIEGE;
+    mode = "specific";
+    leftLogo = sp.logo;
+    rightLogo = ETAB_HANDYUP_NO_SLOGAN[sp.sector] || "";
+  }
+
+  const textColor = (sector==="pro") ? "#000000" : "#1D2A58";
+
+  const telLine=(telFixe.value||telMobile.value)
+    ? `Tél. : ${telFixe.value||""}${(telFixe.value&&telMobile.value)?" - ":""}${telMobile.value||""}<br>`
+    : "";
+
+  let bottomBlock = "";
+
+  if(mode === "corporate"){
+    bottomBlock = `
+      <tr>
+        <td colspan="2" style="padding-top:14px">
+          <table cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin:0">
+            <tr>
+              <td style="vertical-align:middle;text-align:left">
+                <img src="${asset(mainLeftVisual)}" style="height:${SIZE.corporateMainH}px;display:block">
+              </td>
+            </tr>
+            ${partnersHTML ? `<tr><td style="padding-top:10px;text-align:left">${partnersHTML}</td></tr>` : ``}
+          </table>
+        </td>
+      </tr>
+    `;
+  }
+
+  if(mode === "sector"){
+    bottomBlock = `
+      <tr>
+        <td colspan="2" style="padding-top:14px">
+          <table cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin:0">
+            <tr>
+              <td style="vertical-align:middle;text-align:left">
+                <img src="${asset(mainLeftVisual)}" style="height:${SIZE.sectorMainH}px;display:block">
+              </td>
+            </tr>
+            ${partnersHTML ? `<tr><td style="padding-top:10px;text-align:left">${partnersHTML}</td></tr>` : ``}
+          </table>
+        </td>
+      </tr>
+    `;
+  }
+
+  if(mode === "etab"){
+    const ll = String(leftLogo || "").toLowerCase();
+    const leftH =
+      (ll === "psp.png") ? SIZE.etabLeftPSPH :
+      (ll === "adapei-enfance-70.png") ? SIZE.etabLeftEnfanceH :
+      SIZE.etabLeftH;
+
+    bottomBlock = `
+      <tr>
+        <td colspan="2" style="padding-top:14px">
+          <table cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse">
+            <tr>
+              <td style="vertical-align:middle;width:55%">
+                ${leftLogo ? `<img src="${asset(leftLogo)}" style="height:${leftH}px;display:block">` : ``}
+              </td>
+              <td style="vertical-align:middle;text-align:right;width:45%">
+                ${rightLogo ? `<img src="${asset(rightLogo)}" style="height:${SIZE.etabRightSectorH}px;display:block;margin-left:auto">` : ``}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    `;
+  }
+
+  if(mode === "specific"){
+    const leftH = sizeForSpecificLeftLogo(leftLogo);
+    bottomBlock = `
+      <tr>
+        <td colspan="2" style="padding-top:14px">
+          <table cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse">
+            <tr>
+              <td style="vertical-align:middle;width:55%">
+                ${leftLogo ? `<img src="${asset(leftLogo)}" style="height:${leftH}px;display:block">` : ``}
+              </td>
+              <td style="vertical-align:middle;text-align:right;width:45%">
+                ${rightLogo ? `<img src="${asset(rightLogo)}" style="height:${SIZE.specificRightSectorH}px;display:block;margin-left:auto">` : ``}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    `;
+  }
+
+  preview.innerHTML = `
+<table cellpadding="0" cellspacing="0" style="font-family:Montserrat regular ;font-size:17px;color:${textColor};border-collapse:collapse">
+  <tr>
+    <td style="padding-right:22px;vertical-align:top;color:${textColor}">
+      <span style="font-weight:700;color:${textColor}">${prenom.value} ${nom.value}</span><br>
+      <span style="color:${textColor}">${fonction.value}</span><br><br>
+      <span style="color:${textColor}">${address}</span><br>
+      <span style="color:${textColor}">${telLine}</span>
+      <a href="mailto:${mail.value}" style="color:${textColor};text-decoration:underline">${mail.value}</a>
+    </td>
+
+  <td style="vertical-align:top;text-align:right">
+  <table cellpadding="0" cellspacing="0" border="0" style="display:inline-table">
+    <tr>
+      <!-- ICÔNES -->
+      <td style="vertical-align:middle;padding-right:6px">
+        <a href="https://www.facebook.com/groupeassociatifhandyup/" target="_blank">
+          <img src="${asset('facebook.png')}" height="${SIZE.socialIconH}" style="display:inline-block;border:0">
+        </a>
+        <a href="https://www.linkedin.com/company/groupe-associatif-handy-up" target="_blank">
+          <img src="${asset('linkedin.png')}" height="${SIZE.socialIconH}" style="display:inline-block;border:0">
+        </a>
+        <a href="https://www.youtube.com/@groupeassociatifhandyup707" target="_blank">
+          <img src="${asset('youtube.png')}" height="${SIZE.socialIconH}" style="display:inline-block;border:0">
+        </a>
+      </td>
+
+      <!-- IMAGE NOUS RECRUTONS -->
+      <td style="vertical-align:middle">
+        <a href="https://handyup.flatchr.io/" target="_blank">
+          <img
+            src="${asset('nous-recrutons.png')}"
+            height="120"
+            alt="Nous recrutons"
+            style="display:block;border:0"
+          >
+        </a>
+      </td>
+    </tr>
+  </table>
+</td>
+
+
+  ${bottomBlock}
+</table>`;
+}
+
+function onTypeChange(){
+  secteurBloc.style.display = (type.value==="secteur") ? "block" : "none";
+  etabBloc.style.display    = (type.value==="etablissement") ? "block" : "none";
+  specificBloc.style.display= (type.value==="specific") ? "block" : "none";
+  update();
+}
+
+function copySignature(){
+  const previewEl = document.getElementById("preview");
+  if(!previewEl || !previewEl.innerHTML.trim()){
+    alert("Aucune signature à copier");
+    return;
+  }
+  const range = document.createRange();
+  range.selectNodeContents(previewEl);
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+
+  try{
+    document.execCommand("copy");
+    selection.removeAllRanges();
+    alert("Signature copiée. Colle-la directement dans Outlook.");
+  }catch(e){
+    selection.removeAllRanges();
+    alert("Erreur lors de la copie");
+  }
+}
+
+/* FIX: on déclare aussi les blocs (sinon erreur) */
+const type = document.getElementById("type");
+const secteurSel = document.getElementById("secteur");
+const etablissement = document.getElementById("etablissement");
+const specific = document.getElementById("specific");
+
+const secteurBloc = document.getElementById("secteurBloc");
+const etabBloc = document.getElementById("etabBloc");
+const specificBloc = document.getElementById("specificBloc");
+
+const prenom = document.getElementById("prenom");
+const nom = document.getElementById("nom");
+const fonction = document.getElementById("fonction");
+const telFixe = document.getElementById("telFixe");
+const telMobile = document.getElementById("telMobile");
+const mail = document.getElementById("mail");
+const preview = document.getElementById("preview");
+</script>
+
+</body>
+</html>
